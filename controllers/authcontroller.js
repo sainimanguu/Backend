@@ -2,7 +2,7 @@ import { User } from "../models/user.js";
 import { ApiResponse } from "../utils/apiresponse.js";
 import { ApiError } from "../utils/apierror.js";
 import { asyncHandler } from '../utils/asynchandler.js';
-import { sendEmail,emailVerificationMailgenContent } from '../utils/mail.js'
+import { sendEmail, emailVerificationMailgenContent } from '../utils/mail.js'
 
 const generateAcessandRefreshTokens = async (userId) => {
     try {
@@ -51,8 +51,23 @@ const registerUser = asyncHandler(async (req, res, next) => {
         subject: "Please Verify your email",
         mailgenContent: emailVerificationMailgenContent(
             user.username,
-
+            `${req.protocol}://${req.get("host")}/api/v1/verify-email/${unHashedToken}`// Link to verify email
         )
-    })
+    });
+    await user.findById(user._id).select("-password -refreshTokens -__v -forgotPasswordToken -forgotPasswordTokenExpiry -emailVerificationToken -emailVerificationExpiry");// Exclude sensitive fields
 
+    if (!createdUser) {
+        throw new ApiError(500, "Something went wrong while creating user",);
+    }
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { user: createUser },
+                "User registered successfully. Please check your email to verify your account."
+            ))
 })
+
+export { registerUser };
