@@ -1,12 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 
-const app = express();
-const port = 3000;
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
+const app = express();
+
 
 app.use(express.json({ limit: "16kb" }))// to handle JSON payloads
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));// to handle URL-encoded payloads
@@ -22,9 +19,10 @@ app.use(cors({
 );
 
 import healthCheckRouter from './routes/healthcheckroute.js';
+import authRouter from './routes/authroute.js';
 app.use('/api/v1/healthcheck', healthCheckRouter);// health check route
+app.use('/api/v1/auth', authRouter)
 
 
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
-})
+
+export default app;
