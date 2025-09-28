@@ -68,6 +68,6 @@ const registerUser = asyncHandler(async (req, res, next) => {
                 { user: createUser },
                 "User registered successfully. Please check your email to verify your account."
             ))
-})
+})                                                                                                                                                                                            
 
 export { registerUser };
