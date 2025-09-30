@@ -4,6 +4,7 @@ import { ApiError } from "../utils/apierror.js";
 import { asyncHandler } from '../utils/asynchandler.js';
 import { sendEmail, emailVerificationMailgenContent } from '../utils/mail.js'
 
+
 const generateAcessandRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId);
@@ -56,6 +57,10 @@ const registerUser = asyncHandler(async (req, res, next) => {
     });
     await user.findById(user._id).select("-password -refreshTokens -__v -forgotPasswordToken -forgotPasswordTokenExpiry -emailVerificationToken -emailVerificationExpiry");// Exclude sensitive fields
 
+    const createdUser = await User.findById(user._id).select(
+        "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
+    );
+
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while creating user",);
     }
@@ -68,6 +73,56 @@ const registerUser = asyncHandler(async (req, res, next) => {
                 { user: createUser },
                 "User registered successfully. Please check your email to verify your account."
             ))
-})                                                                                                                                                                                            
+})
+
+const login = new asyncHandler(async (req, res, next) => {
+    const { email, password, username } = req.body;
+
+    if ((!email || !username)) {
+        throw new ApiError(400, "Email or username and password are required", []);// Bad request
+    }
+
+
+    const user = await User.findOne({ email })
+    if ((!user)) {
+        throw new ApiError(400, "User not exist", []);
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if ((!isPasswordValid)) {
+        throw new ApiError(400, "Not valid Pass", []);
+    }
+
+    const { accessToken, refreshToken } = await generateAcessandRefreshTokens(user._id)
+
+    const loggedInUser = await User.findById(user._id).select(
+        "-password -refreshToken -__v -forgotPasswordToken -forgotPasswordTokenExpiry -emailVerificationToken -emailVerificationExpiry",
+    );
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+    }
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: loggedInUser,
+                    accessToken,
+                    refreshToken
+                },
+                "User logged in successfully"
+            )
+        )
+
+
+});
+
+
 
 export { registerUser };
