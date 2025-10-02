@@ -1,6 +1,5 @@
-import { User } from "../models/user.js";
-import { ApiResponse } from "../utils/apiresponse.js";
-import { ApiError } from "../utils/apierror.js";
+import { User } from '../models/user.model.js'
+import { ApiResponse, ApiError } from "../utils/apiresponse.js";
 import { asyncHandler } from '../utils/asynchandler.js';
 import { sendEmail, emailVerificationMailgenContent } from '../utils/mail.js'
 
@@ -70,7 +69,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
         .json(
             new ApiResponse(
                 200,
-                { user: createUser },
+                { user: createdUser },
                 "User registered successfully. Please check your email to verify your account."
             ))
 })
@@ -122,7 +121,30 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 const logoutUser = asyncHandler(async (req, res, next) => {
-  
-})
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshTokens: ""
+            }
+        },
+        {
+            new: true,
+        },
+    );
+    const options = {
+        httpOnly: true,// Not accessible by client-side scripts
+        secure: true,
+    }
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json({
+            status: 200,
+            message: "User logged out successfully",
+            data: null,
+        })
+});
 
 export { registerUser, login, logoutUser };
