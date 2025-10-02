@@ -4,7 +4,6 @@ import { ApiError } from "../utils/apierror.js";
 import { asyncHandler } from '../utils/asynchandler.js';
 import { sendEmail, emailVerificationMailgenContent } from '../utils/mail.js'
 
-
 const generateAcessandRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId);
@@ -16,7 +15,8 @@ const generateAcessandRefreshTokens = async (userId) => {
             validatebeforeSave: false,
         });
         return { accessToken, refreshToken };
-    } catch (error) {
+    }
+    catch (error) {
         throw new ApiError(500, "Something went wrong while generating tokens", [error]);
     }
 }
@@ -75,7 +75,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
             ))
 })
 
-const login = new asyncHandler(async (req, res, next) => {
+const login = asyncHandler(async (req, res, next) => {
     const { email, password, username } = req.body;
 
     if ((!email || !username)) {
@@ -119,10 +119,8 @@ const login = new asyncHandler(async (req, res, next) => {
                 "User logged in successfully"
             )
         )
-
-
 });
 
 
 
-export { registerUser };
+export { registerUser, login };
