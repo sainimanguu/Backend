@@ -1,5 +1,6 @@
 import { User } from '../models/user.model.js'
-import { ApiResponse, ApiError } from "../utils/apiresponse.js";
+import { ApiResponse } from "../utils/apiresponse.js";
+import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asynchandler.js';
 import { sendEmail, emailVerificationMailgenContent } from '../utils/mail.js'
 
@@ -147,4 +148,18 @@ const logoutUser = asyncHandler(async (req, res, next) => {
         })
 });
 
-export { registerUser, login, logoutUser };
+const getcurrentUser = asyncHandler(async (req, res, next) => {
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            req.user,
+            "Current User fetched"
+        ))
+})
+
+const verifyEmail = asyncHandler(async (req, res, next) => {
+    const { } = req.params;
+    
+})
+export { registerUser, login, logoutUser, getcurrentUser, verifyEmail };
