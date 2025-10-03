@@ -159,7 +159,11 @@ const getcurrentUser = asyncHandler(async (req, res, next) => {
 })
 
 const verifyEmail = asyncHandler(async (req, res, next) => {
-    const { } = req.params;
-    
+    const { verificationToken } = req.params
+
+    if (!verificationToken) {
+        throw new ApiError(400, "Email Verification token is required", []);
+    }
+
 })
 export { registerUser, login, logoutUser, getcurrentUser, verifyEmail };
