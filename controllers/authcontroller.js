@@ -165,5 +165,45 @@ const verifyEmail = asyncHandler(async (req, res, next) => {
         throw new ApiError(400, "Email Verification token is required", []);
     }
 
+    let hashedToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
+
+    const user = await User.findOne({
+        emailVerificationToken: hashedToken,
+        emailVerificationExpiry: { $gt: Date.now() },// Check if token is not expired
+
+    })
+
+    if (!user) {
+        throw new ApiError(400, "Invalid or expired email verification token", []);
+    }
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpiry = undefined;// Remove token and expiry after verification
+
+    user.isEmailVerified = true;
+    await user.save({ validatebeforeSave: false, });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            {
+                isEmailVerified: true,
+            },
+            "Email verified successfully"
+        ))
+})
+
+const resendEmailVerification = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user?._id)
+
+    if (!user) {
+        throw new ApiError(404, "User not found", []);
+    }
+    if (user.isEmailVerified) {
+        throw new ApiError(400, "Email is already verified", []);
+    }
+
+
+
 })
 export { registerUser, login, logoutUser, getcurrentUser, verifyEmail };
