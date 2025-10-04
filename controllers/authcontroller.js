@@ -325,9 +325,53 @@ const resetPassword = asyncHandler(async (req, res, next) => {
         .update(resetToken)
         .digest("hex")
 
+    const user = await User.findOne({
+        forgotPasswordToken: hashedToken,
+        forgotPasswordTokenExpiry: { $gt: Date.now() },// Check if token is not expired
+    })
+
+    if (!user) {
+        throw new ApiError(489, "Token is invalid or expired", []);
+    }
+
+    user.forgotPasswordTokenExpiry = undefined;
+    user.forgotPasswordToken = undefined;
+
+    user.password = newPassword;
+
+    await user.save({ validateBeforeSave: false });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            {},
+            "Password reset successfully"
+        ))
 
 })
 
+const changeCurrentPassword = asyncHandler(async (req, res, next) => {
+
+    const { oldPassword, newPassword } = req.body;
+    await User.findById(req.user?._id)
+
+    const user = await user.isPasswordCorrect(oldPassword)
+    if (!user) {
+        throw new ApiError(400, "Old password is incorrect", []);
+    }
+
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            {},
+            "Password changed successfully"
+        ))
+})
 
 export {
     registerUser,
@@ -338,4 +382,6 @@ export {
     resendEmailVerification,
     refreshAcessToken,
     forgotPasswordRequest,
+    resetPassword,
+    changeCurrentPassword
 };
