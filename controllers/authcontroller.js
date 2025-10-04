@@ -5,7 +5,7 @@ import { asyncHandler } from '../utils/asynchandler.js';
 import { sendEmail, emailVerificationMailgenContent } from '../utils/mail.js'
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { use } from 'react';
+
 
 const generateAcessandRefreshTokens = async (userId) => {
     try {
@@ -284,6 +284,49 @@ const refreshAcessToken = asyncHandler(async (req, res, next) => {
     }
 })
 
+const forgotPasswordRequest = asyncHandler(async (req, res, next) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email })
+
+    if (!user) {
+        throw new ApiError(404, "User not found", []);
+    }
+
+    const { unHashedToken, hashedToken, tokenExpiry } = user.generateTemporaryToken();//it is needed to reset password
+    user.forgotPasswordToken = hashedToken;
+    user.forgotPasswordTokenExpiry = tokenExpiry;
+
+    await user.save({ validatebeforeSave: false, });
+
+    await sendEmail({
+        email: user?.email,//? is used to check if user is not null or undefined
+        subject: "Reset your password",
+        mailgenContent: emailVerificationMailgenContent(
+            user.username,
+            `${process.env.FORGOT_PASSWORD_REDIRECT_URL}`// Link to reset password
+        )
+    });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            {},
+            "Password reset email sent successfully. Please check your email."
+        ))
+});
+
+const resetPassword = asyncHandler(async (req, res, next) => {
+    const { resetToken } = req.params;
+    const { newPassword } = req.body;
+
+    let hashedToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex")
+
+
+})
 
 
 export {
@@ -294,4 +337,5 @@ export {
     verifyEmail,
     resendEmailVerification,
     refreshAcessToken,
+    forgotPasswordRequest,
 };
