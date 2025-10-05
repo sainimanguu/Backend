@@ -1,6 +1,17 @@
 import { Router } from "express";
-import { forgotPasswordRequest, logoutUser, refreshAcessToken, registerUser, verifyEmail } from "../controllers/authcontroller.js"
-import { login } from "../controllers/authcontroller.js"
+import {
+    registerUser,
+    login,
+    logoutUser,
+    getcurrentUser,
+    verifyEmail,
+    resendEmailVerification,
+    refreshAcessToken,
+    forgotPasswordRequest,
+    resetPassword,
+    changeCurrentPassword
+} from "../controllers/authcontroller.js"
+
 import { validate } from "../middleware/validator.js"
 import { userRegisterValidator, userLoginValidator, userForgotPasswordValidator } from "../validators/index.js"
 import { verifyjwt } from "../middleware/authmiddleware.js"
@@ -14,7 +25,6 @@ router.route("/verify-email/:verificationToken").get(verifyEmail);
 router.route("/refresh-token").post(refreshAcessToken);
 router.route("/forgot-password").post(userForgotPasswordValidator(), validate, forgotPasswordRequest);
 router.route("/reset-password/resetToken").post(userForgotPasswordValidator(), validate, resetPassword);
-
 
 
 //secured routes
