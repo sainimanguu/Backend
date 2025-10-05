@@ -77,4 +77,4 @@ const resetForgotPasswordValidator = () => {
     ]
 }
 
-export { userRegisterValidator, userLoginValidator }
+export { userRegisterValidator, userLoginValidator, userChangePasswordValidator, userForgotPasswordValidator, resetForgotPasswordValidator };
