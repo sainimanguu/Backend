@@ -27,7 +27,7 @@ router.route("/forgot-password").post(userForgotPasswordValidator(), validate, f
 router.route("/reset-password/resetToken").post(userForgotPasswordValidator(), validate, resetPassword);
 
 
-//secured routes
+//secure routes
 router.route("/logout").post(verifyjwt, logoutUser)
 router.route("/current-user").post(verifyjwt, getcurrentUser,);
 router.route("/change-password").post(verifyjwt, userForgotPasswordValidator(), validate, changeCurrentPassword);

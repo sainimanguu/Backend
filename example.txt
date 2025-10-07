@@ -4,3 +4,10 @@
     "password":"one123"
 }
 
+Pipelining:-
+
+{
+    $match:{
+        isActive:true;
+        }
+}
