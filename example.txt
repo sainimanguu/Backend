@@ -10,4 +10,8 @@ Pipelining:-
     $match:{
         isActive:true;
         }
+
+    $match:{
+        age:18;
+    }
 }
