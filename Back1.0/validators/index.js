@@ -6,7 +6,7 @@ const userRegisterValidator = () => {
             .trim()
             .notEmpty()
             .withMessage("Email is required")
-            .isEmail()//it checks if the input is a valid email address
+            .isEmail()//it checks if the input is a valid email address and 
             .withMessage("Invalid email address"),//it is used to specify the error message that will be returned if the validation fails
 
         body("username")
